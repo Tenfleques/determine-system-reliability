@@ -1,7 +1,6 @@
 import org.apache.commons.math3.special.Erf;
 import org.apache.commons.math3.special.Gamma;
 
-import java.security.Key;
 import java.util.HashMap;
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class Distributions {
 
 
 
-    public static  HashMap<String, Double> exp(Double[] args){
+    private static  HashMap<String, Double> exp(Double[] args){
         Double lambda = args[0], t = args[1];
 
         Double ft = lambda * Math.exp(-1*lambda*t);
@@ -87,11 +86,11 @@ public class Distributions {
 
         return x;
     }
-    public static  HashMap<String, Double> uniform(Double args[]){
+    private static  HashMap<String, Double> uniform(Double args[]){
         Double a = args[0], b = args[1], t = args[2];
 
-        Double ft = 0.0;
-        Double pt = 0.;
+        double ft = 0.0;
+        double pt = 0.;
         if(a <= t && t <= b){
             ft = 1 / (b - a);
             pt = (b-t)/(b-a);
@@ -107,7 +106,7 @@ public class Distributions {
 
         return x;
     }
-    public static  HashMap<String,Double> gamma(Double [] args){
+    private static  HashMap<String,Double> gamma(Double[] args){
         Double alpha = args[0], beta = args[1], t = args[2];
 
         Double ft = (Math.pow(t, alpha - 1)/ (Math.pow(beta, alpha) * Gamma.gamma(alpha))) * Math.exp(-t/beta);
@@ -120,7 +119,7 @@ public class Distributions {
         return x;
     }
 
-    public static  HashMap<String, Double> truncatedNormal(Double [] args){
+    private static  HashMap<String, Double> truncatedNormal(Double[] args){
         Double m = args[0], sigma = args[1], t = args[2];
 
         Double c = 1 /(0.5 + Erf.erf(m/sigma));
@@ -131,7 +130,7 @@ public class Distributions {
         return x;
     }
 
-    public static  HashMap<String, Double> rayleigh(Double [] args){
+    private static  HashMap<String, Double> rayleigh(Double[] args){
         Double lambda = args[0], t = args[1];
 
         Double ft = 2*lambda*t*Math.exp(-1*lambda*Math.pow(t,2.0));
@@ -141,7 +140,7 @@ public class Distributions {
         x.put(Keys.PT.getValue(), pt);
         return x;
     }
-    public static  HashMap<String, Double> weibull(Double [] args){
+    private static  HashMap<String, Double> weibull(Double[] args){
         Double alpha =  args[0], beta = args[1], t = args[2];
 
         Double ft, pt;
@@ -153,7 +152,7 @@ public class Distributions {
         x.put(Keys.PT.getValue(), pt);
         return x;
     }
-    public static  HashMap<String, Double> normal(Double [] args){
+    private static  HashMap<String, Double> normal(Double[] args){
         Double m = args[0]
                 ,sigma = args[1]
                 ,t = args[2];
@@ -175,7 +174,15 @@ public class Distributions {
         args[i - 1] = t;
         return args;
     }
-    public static HashMap<String, Double> getFtPt(List<String> task, Double t){
+    private static Double [] getArgs(List<String> task){
+        Double[] args = new Double[task.size()];
+        int i = 1;
+        for(; i < task.size(); ++ i){
+            args[i -1] = Double.parseDouble(task.get(i));
+        }
+        return args;
+    }
+    static HashMap<String, Double> getFtPt(List<String> task, Double t){
 
         if (task.get(0).equals(Keys.EXPONENTIAL.getValue()))
                 return exp(getArgs(task, t));
@@ -195,6 +202,28 @@ public class Distributions {
         HashMap<String, Double> x = new HashMap<>();
         x.put(Keys.FT.getValue(),0.0);
         x.put(Keys.PT.getValue(), 0.0);
+        return x;
+    }
+    static HashMap<String, Double> getMSigma(List<String> task){
+        Double [] args = getArgs(task);
+        if (task.get(0).equals(Keys.EXPONENTIAL.getValue()))
+            return msExp(args[0]);
+        if (task.get(0).equals(Keys.RAYLEIGH.getValue()))
+            return msRayleigh(args[0]);
+        if (task.get(0).equals(Keys.GAMMA.getValue()))
+            return msGamma(args[0], args[1]);
+        if (task.get(0).equals(Keys.WEIBULL.getValue()))
+            return msWeibull(args[0], args[1]);
+        if (task.get(0).equals(Keys.TRUNCATED_NORMAL.getValue()))
+            return msTruncatedNormal(args[0], args[1]);
+        if (task.get(0).equals(Keys.NORMAL.getValue()))
+            return msNormal(args[0], args[1]);
+        if (task.get(0).equals(Keys.U.getValue()))
+            return msUniform(args[0], args[1]);
+
+        HashMap<String, Double> x = new HashMap<>();
+        x.put(Keys.M.getValue(),0.0);
+        x.put(Keys.SIGMA.getValue(), 0.0);
         return x;
     }
 }
